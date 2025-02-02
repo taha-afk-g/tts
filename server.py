@@ -2,6 +2,15 @@ import os
 from flask import Flask, request, jsonify, send_file, render_template
 import uuid  # For unique filenames
 from google.cloud import texttospeech
+<<<<<<< HEAD
+=======
+from dotenv import load_dotenv
+import os
+
+load_dotenv()  # Load environment variables from .env file
+
+api_key = os.getenv('API_KEY')  # Access the API key from environment variables
+>>>>>>> 3079154 (Initial commit with server, requirements, and index.html)
 
 app = Flask(__name__)
 
