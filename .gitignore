@@ -15,6 +15,17 @@ venv/
 env/
 ENV/
 
+# Ignore sensitive files
+*.json
+*.env
+output/
+
+# Ignore MacOS system files
+.DS_Store
+
+# Ignore VSCode workspace settings
+.vscode/
+
 # Ignore MacOS system files
 .DS_Store
 
