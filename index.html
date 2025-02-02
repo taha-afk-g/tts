@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text-to-Speech</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #333;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: auto;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            resize: none;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #download {
+            display: none;
+            background-color: #28a745;
+            text-decoration: none;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: inline-block;
+        }
+        #download:hover {
+            background-color: #218838;
+        }
+        audio {
+            display: none;
+            margin-top: 15px;
+            width: 100%;
+        }
+        .count-info {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Text-to-Speech</h1>
+
+        <label for="text">Enter text:</label>
+        <textarea id="text" name="text" placeholder="Type something..." oninput="updateCount()"></textarea>
+        
+        <label for="voice">Choose a voice:</label>
+        <select id="voice">
+            {% for voice, name in voices.items() %}
+                <option value="{{ voice }}">{{ name }}</option>
+            {% endfor %}
+        </select>
+
+        <button onclick="generateTTS()">Generate</button>
+
+        <a id="download">Download</a>
+        <audio id="audio" controls></audio>
+
+        <div class="count-info">
+            <span id="wordCount">Words: 0</span><br>
+            <span id="charCount">Characters: 0</span>
+        </div>
+    </div>
+
+    <script>
+        function updateCount() {
+            const text = document.getElementById("text").value;
+            const wordCount = text.trim().split(/\s+/).filter(Boolean).length;
+            const charCount = text.length;
+
+            document.getElementById("wordCount").textContent = "Words: " + wordCount;
+            document.getElementById("charCount").textContent = "Characters: " + charCount;
+        }
+
+        async function generateTTS() {
+            const text = document.getElementById("text").value.trim();
+            const voice = document.getElementById("voice").value;
+    
+            if (!text) {
+                alert("Please enter text.");
+                return;
+            }
+    
+            console.log("🔹 Sending request to /tts...");
+            
+            const response = await fetch("/tts", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: text, voice: voice })
+            });
+    
+            const data = await response.json();
+            console.log("🔹 Response received:", data);
+    
+            if (response.ok) {
+                const audioElement = document.getElementById("audio");
+                const downloadButton = document.getElementById("download");
+    
+                audioElement.src = data.audioUrl;
+                audioElement.style.display = "block";
+                audioElement.play();
+    
+                downloadButton.href = data.audioUrl;
+                downloadButton.style.display = "block";
+                downloadButton.setAttribute("download", data.filename);
+    
+                console.log("✅ Audio generated successfully!");
+            } else {
+                alert("❌ Error: " + (data.error || "Something went wrong."));
+            }
+        }
+    </script>
+</body>
+</html>
