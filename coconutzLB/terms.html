@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
+        
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #ffffff;
+        }
+
+        /* Desktop Navbar Styles */
+        .navbar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #e0a771;
+            padding: 10px 20px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            transition: background-color 0.3s ease;
+            z-index: 1000;
+        }
+
+        .navbar.scrolled {
+            background-color: #e0a771;
+            opacity: 0.8;
+        }
+
+        .navbar a {
+            color: rgb(0, 0, 0);
+            text-decoration: none;
+            padding: 10px 15px;
+            transition: background 0.3s ease;
+        }
+
+        .navbar a:hover {
+            background-color: #ffffff;
+        }
+
+        .navbar-left, .navbar-right, .navbar-center {
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-center {
+            flex-grow: 1;
+            text-align: center; /* Ensure the logo stays centered */
+        }
+
+        .cart-icon {
+            position: relative;
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: red;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 5px;
+            font-size: 12px;
+        }
+
+        /* Mobile-specific styling */
+        @media (max-width: 768px) {
+            .navbar {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px 20px;
+            }
+
+            .menu-icon {
+                font-size: 28px;
+                cursor: pointer;
+            }
+
+            .navbar-center {
+                flex-grow: 1;
+                text-align: center;
+                padding-left: 100px; /* Adjust this value for custom distance on mobile */
+            }
+            .navbar-center img {
+                width: 80px; /* Adjusted for mobile */
+                height: auto;
+            }
+
+            .navbar-right {
+                display: flex;
+                justify-content: flex-end;
+                gap: 15px;
+                align-items: center;
+                padding-right: 25px; /* Adjusted for visibility */
+            }
+
+            .navbar-right a.cart-icon {
+                margin-right: 5px; /* Move the cart button slightly left */
+            }
+
+            .navbar-left {
+                display: none; /* Hidden by default, will show in overlay */
+            }
+
+            .navbar.open .navbar-left {
+                display: flex;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                flex-direction: column;
+                background-color: rgba(0, 0, 0, 0.9);
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+            }
+
+            .navbar-left a {
+                font-size: 24px;
+                color: white;
+                margin: 20px 0;
+            }
+
+            .close-btn {
+                position: absolute;
+                top: 20px;
+                right: 30px;
+                font-size: 36px;
+                color: white;
+                cursor: pointer;
+            }
+
+            /* Hide Contact Us in the navbar on mobile */
+            .navbar-right .contact-link {
+                display: none;
+            }
+        }
+
+        /* Desktop-specific styling (restore horizontal layout for desktop) */
+        @media (min-width: 769px) {
+            .navbar {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .navbar-left{
+                display: flex;
+                align-items: center;
+                margin-right: 20px; /* Allow left and right sections to take equal space */
+            }
+
+            .menu-icon {
+                display: none; /* Hide hamburger icon on desktop */
+            }
+
+            .navbar-center {
+                display: flex;
+                justify-content: center; /* Center the logo */
+                flex-grow: 0; /* Prevent logo from expanding too much */
+                padding-left: 0; /* Ensure no extra padding */
+            }
+
+            .navbar-right {
+                display: flex;
+                justify-content: flex-end;
+                gap: 15px;
+                align-items: center;
+                flex-grow: 0; /* Prevent the right section from expanding */
+            }
+            .navbar-center img {
+                width: 100px;
+                height: auto;
+            }
+
+            /* Show Contact Us on desktop */
+            .navbar-right .contact-link {
+                display: inline-block;
+            }
+        }
+
+        /* Overlay menu default styling */
+        .overlay-menu {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        /* When the menu is open, show the overlay */
+        .overlay-menu.open {
+            display: flex;
+        }
+
+        /* Style the links in the overlay menu */
+        .overlay-menu a {
+            padding: 20px;
+            font-size: 24px;
+            color: white;
+            text-decoration: none;
+            text-align: center;
+            display: block;
+            transition: 0.3s ease;
+        }
+
+        .overlay-menu a:hover {
+            color: #c68247;
+        }
+
+        /* Close button inside the overlay */
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 36px;
+            cursor: pointer;
+        }
+
+        .terms {
+            text-align: center;
+            margin-top: 100px;
+            background-color: #ffffff;
+            margin-bottom: 10px;
+        }
+
+        .terms h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        .terms h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+        .terms p {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            text-align: left;
+            direction: ltr;
+        }
+        .terms .content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 20px 30px rgba(0,0,0,0.4);
+        }
+        .terms p:last-of-type {
+            text-align: center;
+        }
+        a{
+            color: #000000;
+        }
+        a:hover{
+            color: #e0a771;
+        }
+        /* Footer section */
+        .footer-container {
+            background-color: #e0a771; 
+            padding: 40px 20px;
+        }
+
+        .footer {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .footer div {
+            flex: 1;
+            margin: 10px 20px;
+            max-width: 400px;
+            color: #ffffff;
+        }
+
+        .footer h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: #000000;
+        }
+
+        .footer p {
+            margin: 10px 0;
+            font-size: 18px;
+            color: #000000;
+        }
+
+        .footer a {
+            color: #000000;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+            color: #c68247;
+        }
+
+        .social-icons {
+            display: flex;
+            font-size: 32px;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .social-icons a {
+            color: #000000;
+            font-size: 24px;
+            transition: color 0.3s ease;
+        }
+
+        .social-icons a:hover {
+            color: #c68247;
+        }
+
+        .all-rights-reserved {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .footer {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .footer div {
+                margin-bottom: 20px;
+            }
+
+            .social-icons {
+                justify-content: center;
+            }
+        }
+    </style>    
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <div class="menu-icon" onclick="toggleMenu()">&#9776;</div> <!-- Only visible on mobile -->
+        <div class="navbar-left">
+            <a href="shop.html">Shop</a>
+            <a href="aboutUs.html">About Us</a>
+        </div>
+        <div class="navbar-center">
+            <a href="main.html"><img src="pics/logo.png" alt="Logo" width="60px" height="40px"></a>
+        </div>
+        <div class="navbar-right">
+            <a href="contact.html" class="contact-link">Contact Us</a> <!-- Hidden on mobile -->
+            <a href="cart.html" class="cart-icon"><i class="fas fa-shopping-cart"></i><span class="cart-count">0</span></a>
+        </div>
+    </nav>
+
+    <!-- Fullscreen Overlay Menu -->
+    <div id="overlay-menu" class="overlay-menu">
+        <span class="close-btn" onclick="toggleMenu()">&times;</span>
+        <a href="shop.html">Shop</a>
+        <a href="aboutUs.html">About Us</a>
+        <a href="contact.html">Contact Us</a> <!-- Added Contact Us in the overlay -->
+    </div>
+    <section class="terms">
+        <div class="content">
+            <h1>Terms of Service</h1>
+        
+            <h2>1. Introduction</h2>
+            <p>Welcome to Coconutz. This website is operated by Coconutz. Throughout the site, the terms “we”, “us”, and “our” refer to Coconutz. By accessing or using our website, including all information, tools, and services available, you agree to be bound by these Terms of Service. If you do not agree to all the terms and conditions of this agreement, you may not access the website or use any services.</p>
+        
+            <h2>2. Online Store Terms</h2>
+            <p>By agreeing to these Terms of Service, you represent that you are at least the age of majority in your state or province of residence, or that you are the age of majority and have given consent for any minor dependents to use this site. You may not use our products for any illegal or unauthorized purposes or violate any laws in your jurisdiction. You must not transmit any harmful code. A breach of any of these terms will result in an immediate termination of your access.</p>
+        
+            <h2>3. General Conditions</h2>
+            <p>We reserve the right to refuse service to anyone at any time for any reason. You understand that your content (excluding payment information) may be transferred unencrypted and involve changes to conform to technical requirements. Payment information is always encrypted. You agree not to reproduce, duplicate, copy, sell, or exploit any part of the Service without express written permission. The headings in this agreement are for convenience only and do not affect the Terms.</p>
+        
+            <h2>4. Accuracy, Completeness, and Timeliness of Information</h2>
+            <p>We are not responsible if information on this site is inaccurate or incomplete. The material is provided for general information and should not be the sole basis for decisions without consulting primary sources. We reserve the right to modify the contents of this site at any time, but we are not obligated to update any information.</p>
+        
+            <h2>5. Modifications to the Service and Prices</h2>
+            <p>Prices for our products are subject to change without notice. We reserve the right to modify or discontinue the Service at any time without notice. We are not liable for any changes, price adjustments, or discontinuation of the Service.</p>
+        
+            <h2>6. Products or Services</h2>
+            <p>Certain products may be available exclusively online and may have limited quantities. We have made every effort to display product colors and images accurately, but we cannot guarantee color accuracy. We reserve the right to limit sales and discontinue products at any time.</p>
+        
+            <h2>7. Accuracy of Billing and Account Information</h2>
+            <p>We reserve the right to refuse or cancel orders at our discretion. We may limit quantities purchased per person or order and may notify you of changes or cancellations. You agree to provide accurate purchase and account information and update it as necessary.</p>
+        
+            <h2>8. Optional Tools</h2>
+            <p>We may provide access to third-party tools over which we have no control. Your use of these tools is at your own risk. We have no liability related to your use of third-party tools.</p>
+        
+            <h2>9. Third-Party Links</h2>
+            <p>Our Service may include links to third-party websites. We are not responsible for the content or accuracy of these sites and disclaim any liability for damages related to third-party materials or transactions.</p>
+        
+            <h2>10. User Comments, Feedback, and Other Submissions</h2>
+            <p>By submitting comments or feedback, you grant us the right to use, edit, and publish them without restriction. We are under no obligation to maintain comments in confidence, pay compensation, or respond.</p>
+        
+            <h2>11. Personal Information</h2>
+            <p>Your submission of personal information through the store is governed by our Privacy Policy, which can be viewed [here].</p>
+        
+            <h2>12. Errors, Inaccuracies, and Omissions</h2>
+            <p>Occasionally, there may be errors or inaccuracies in the information on our site. We reserve the right to correct these errors and update information as needed. We undertake no obligation to update information on our site unless required by law.</p>
+        
+            <h2>13. Prohibited Uses</h2>
+            <p>You are prohibited from using the site for unlawful purposes, to solicit unlawful acts, or to violate intellectual property rights. You must not submit false information, upload viruses, or interfere with the site’s security.</p>
+        
+            <h2>14. Disclaimer of Warranties; Limitation of Liability</h2>
+            <p>We do not guarantee that the Service will be uninterrupted or error-free. The Service and all products are provided “as is” and “as available”. We are not liable for any direct or indirect damages resulting from your use of the Service.</p>
+        
+            <h2>15. Indemnification</h2>
+            <p>You agree to indemnify and hold harmless Coconutz and its affiliates from any claims or demands arising out of your breach of these Terms or violation of any laws.</p>
+        
+            <h2>16. Severability</h2>
+            <p>If any provision of these Terms is found to be unlawful or unenforceable, it will be severed, and the remaining provisions will remain in effect.</p>
+        
+            <h2>17. Termination</h2>
+            <p>These Terms are effective unless terminated by either party. You may terminate by ceasing use of our site. We may terminate access if you violate these Terms.</p>
+        
+            <h2>18. Entire Agreement</h2>
+            <p>These Terms, along with any policies posted on our site, constitute the entire agreement between you and us. Any ambiguities in interpretation will not be construed against the drafting party.</p>
+        
+            <h2>19. Governing Law</h2>
+            <p>These Terms are governed by the laws of Lebanon.</p>
+        
+            <h2>20. Changes to Terms of Service</h2>
+            <p>We reserve the right to update these Terms at any time. Your continued use of the site constitutes acceptance of the updated Terms.</p>
+        
+            <h2>21. Contact Information</h2>
+            <p>For any questions about these Terms of Service, please contact us at:</p>
+            <p>CoconutzLB<br>Email: <a href="mailto:coconutzlb@gmail.com">coconutzlb@gmail.com</a><br>Phone: <a href="tel:+96181987929">+961 81 987 929</a></p>
+        </div>
+    </section>
+
+    <div class="footer-container">
+        <footer class="footer">
+            <div class="footer-logo">
+                <a href="index.html"><img src="pics/logo.png" width="160px" height="100px" alt="Logo"></a>
+            </div>
+            <div class="footer-policies">
+                <h2>Policies</h2>
+                <p><a href="privacy.html">Privacy Policy</a></p>
+                <p><a href="terms.html">Terms</a></p>
+                <p><a href="refunds.html">Refunds & Returns</a></p>
+                <p><a href="delivery.html">Delivery Policy</a></p>
+            </div>
+            <div class="footer-contact-us">
+                <h2>Contact Us</h2>
+                <p>Phone: <a href="tel:+96181987929">+961 81 987 929</a></p>
+                <p>Email: <a href="mailto:coconutzlb@gmail.com">coconutzlb@gmail.com</a></p>
+                <p>WhatsApp: <a href="https://wa.me/+96181987929">+961 81 987 929</a></p>
+                <div class="social-icons">
+                    <a href="https://www.instagram.com/coconutz_lb" target="_blank"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.facebook.com/your_facebook_profile" target="_blank"><i class="fab fa-facebook-square"></i></a>
+                </div>
+            </div>
+        </footer>
+        <div class="all-rights-reserved">
+            <p>&copy; 2024 CocoNutzLB. All rights reserved.</p>
+        </div>
+    </div>
+    <script>
+        window.addEventListener('scroll', function() {
+            var navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) { // Adjust this value to set the scroll trigger point
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+        function toggleMenu() {
+            const overlayMenu = document.getElementById('overlay-menu');
+            overlayMenu.classList.toggle('open'); // Toggle the 'open' class to show/hide the menu
+        }
+        // Add scroll event listener to handle the navbar change on scroll
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) { // Adjust the scroll position value as needed
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+    </script>
+</body>
+</html>

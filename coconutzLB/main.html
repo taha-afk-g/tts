@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
+        
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #ffffff;
+        }
+
+        /* Desktop Navbar Styles */
+        .navbar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #e0a771;
+            padding: 10px 20px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            transition: background-color 0.3s ease;
+            z-index: 1000;
+        }
+
+        .navbar.scrolled {
+            background-color: #e0a771;
+            opacity: 0.8;
+        }
+
+        .navbar a {
+            color: rgb(0, 0, 0);
+            text-decoration: none;
+            padding: 10px 15px;
+            transition: background 0.3s ease;
+        }
+
+        .navbar a:hover {
+            background-color: #ffffff;
+        }
+
+        .navbar-left, .navbar-right, .navbar-center {
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-center {
+            flex-grow: 1;
+            text-align: center; /* Ensure the logo stays centered */
+        }
+
+        .cart-icon {
+            position: relative;
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: red;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 5px;
+            font-size: 12px;
+        }
+
+        /* Mobile-specific styling */
+        @media (max-width: 768px) {
+            .navbar {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px 20px;
+            }
+
+            .menu-icon {
+                font-size: 28px;
+                cursor: pointer;
+            }
+
+            .navbar-center {
+                flex-grow: 1;
+                text-align: center;
+                padding-left: 100px; /* Adjust this value for custom distance on mobile */
+            }
+            .navbar-center img {
+                width: 80px; /* Adjusted for mobile */
+                height: auto;
+            }
+
+            .navbar-right {
+                display: flex;
+                justify-content: flex-end;
+                gap: 15px;
+                align-items: center;
+                padding-right: 25px; /* Adjusted for visibility */
+            }
+
+            .navbar-right a.cart-icon {
+                margin-right: 5px; /* Move the cart button slightly left */
+            }
+
+            .navbar-left {
+                display: none; /* Hidden by default, will show in overlay */
+            }
+
+            .navbar.open .navbar-left {
+                display: flex;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                flex-direction: column;
+                background-color: rgba(0, 0, 0, 0.9);
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+            }
+
+            .navbar-left a {
+                font-size: 24px;
+                color: white;
+                margin: 20px 0;
+            }
+
+            .close-btn {
+                position: absolute;
+                top: 20px;
+                right: 30px;
+                font-size: 36px;
+                color: white;
+                cursor: pointer;
+            }
+
+            /* Hide Contact Us in the navbar on mobile */
+            .navbar-right .contact-link {
+                display: none;
+            }
+        }
+
+        /* Desktop-specific styling (restore horizontal layout for desktop) */
+        @media (min-width: 769px) {
+            .navbar {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .navbar-left{
+                display: flex;
+                align-items: center;
+                margin-right: 20px; /* Allow left and right sections to take equal space */
+            }
+
+            .menu-icon {
+                display: none; /* Hide hamburger icon on desktop */
+            }
+
+            .navbar-center {
+                display: flex;
+                justify-content: center; /* Center the logo */
+                flex-grow: 0; /* Prevent logo from expanding too much */
+                padding-left: 0; /* Ensure no extra padding */
+            }
+
+            .navbar-right {
+                display: flex;
+                justify-content: flex-end;
+                gap: 15px;
+                align-items: center;
+                flex-grow: 0; /* Prevent the right section from expanding */
+            }
+            .navbar-center img {
+                width: 100px;
+                height: auto;
+            }
+
+            /* Show Contact Us on desktop */
+            .navbar-right .contact-link {
+                display: inline-block;
+            }
+        }
+
+        /* Overlay menu default styling */
+        .overlay-menu {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        /* When the menu is open, show the overlay */
+        .overlay-menu.open {
+            display: flex;
+        }
+
+        /* Style the links in the overlay menu */
+        .overlay-menu a {
+            padding: 20px;
+            font-size: 24px;
+            color: white;
+            text-decoration: none;
+            text-align: center;
+            display: block;
+            transition: 0.3s ease;
+        }
+
+        .overlay-menu a:hover {
+            color: #c68247;
+        }
+
+        /* Close button inside the overlay */
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 36px;
+            cursor: pointer;
+        }
+
+        .slider {
+            position: relative;
+            width: 100%;
+            height: 60vh; /* Update this value to the desired percentage height */
+            margin-top: 105px;
+        }
+
+        .slider img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.5;
+        }
+
+        .button-container {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            transform: translateY(-50%);
+        }
+
+        .overlay-buttons {
+            text-decoration: none;
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            justify-content: flex-start; 
+        }
+
+        .overlay-buttons button {
+            background-color: #e0a771;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .overlay-buttons button a {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+        }
+
+        .overlay-buttons button:hover {
+            background-color: #c68247;
+        }
+
+        .text-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: black;
+            font-size: 25px;
+            text-align: left; 
+        }
+
+        .text-overlay p {
+            font-weight: bold;
+            direction: ltr;
+            text-align: left; 
+        }
+        .content {
+            padding: 20px;
+        }
+
+        .content p {
+            text-align: center;
+            color: #e0a771;
+            margin: 20px 0;
+            font-size: 32px;
+        }
+
+        .content h1 {
+            text-align: center;
+            font-size: 70px;
+            color: #c68247;
+            margin: 20px 0;
+        }
+
+        /* Media query for mobile adjustments */
+        @media (max-width: 768px) {
+            /* Make the content smaller */
+            .content h1 {
+                font-size: 40px; /* Smaller font size for mobile */
+            }
+
+            .content p {
+                font-size: 24px; /* Adjust the font size of the paragraph */
+            }
+
+            /* Make the text overlay smaller */
+            .text-overlay {
+                font-size: 18px; /* Reduce the text size */
+                width: 90%; /* Ensure it fits better on small screens */
+                line-height: 1.3; /* Adjust the line height for readability */
+            }
+
+            .text-overlay p {
+                font-size: 18px; /* Adjust the font size */
+            }
+
+            /* Adjust the overlay buttons */
+            .overlay-buttons button {
+                padding: 8px; /* Smaller padding for the buttons */
+            }
+
+            .overlay-buttons button a {
+                font-size: 14px; /* Adjust the button text size */
+            }
+
+            /* Adjust image sizes */
+            .slider img {
+                height: auto; /* Let the height adjust automatically */
+            }
+
+            /* Adjust the grid layout for mobile */
+            .listing-container {
+                grid-template-columns: repeat(2, 1fr); /* Show 2 items per row */
+            }
+        }
+
+        /* Grid Layout Adjustments */
+        .listing-container {
+            display: grid;
+            grid-template-columns: repeat(3, min-content);
+            gap: 20px; /* Adjust this value to control the space between items */
+            justify-content: center;
+            padding: 20px;
+        }
+
+
+        /* Listing Item Styling */
+        .listing-item {
+            background-color: #ffffff;
+            color: rgb(0, 0, 0);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 8px 12px #e0a771;
+            border-radius: 10px;
+            overflow: hidden;
+            text-align: center;
+            height: 400px; 
+            width: 300px;
+            position: relative; /* Add this line to position the button */
+        }
+
+        .listing-item img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            transition: opacity 0.3s ease;
+        }
+
+        .listing-item img:hover {
+            opacity: 0.5;
+        }
+
+        
+        .listing-content {
+            justify-content: flex-start;
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .listing-content p {
+            color: rgb(0, 0, 0);
+            direction: ltr;
+            text-align: left;
+            margin: 0;
+        }
+
+        .listing-content .price {
+            color: rgb(0, 0, 0);
+            direction: ltr;
+            text-align: left;
+            margin: 0;
+        }
+
+        .add-to-cart-button {
+            background-color: #e0a771;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-top: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background 0.3s ease;
+            width: 100%;
+            opacity: 0;
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: opacity 0.3s ease;
+        }
+
+        .listing-item:hover .add-to-cart-button {
+            opacity: 1;
+        }
+
+        .add-to-cart-button:hover {
+            background-color: #c68247;
+        }
+
+        /* Responsive Text and Overlay Adjustments for Mobile */
+        @media (max-width: 768px) {
+            .add-to-cart-button {
+                opacity: 1; /* Always visible on mobile */
+                position: static; /* Remove absolute positioning to prevent layout issues */
+                transform: none; /* Remove transform */
+                margin-top: 10px; /* Add some spacing */
+            }
+            .listing-container {
+                grid-template-columns: repeat(2, 1fr); /* 2 items per row on mobile */
+                gap: 15px;
+            }
+            .listing-item {
+                background-color: #ffffff;
+                color: rgb(0, 0, 0);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                box-shadow: 0 8px 12px #e0a771;
+                border-radius: 10px;
+                overflow: hidden;
+                text-align: center;
+                height: 430px; 
+                width: 100%; /* Ensures it fits within the grid */
+                position: relative;
+            }
+            .listing-item img {
+                width: 100%;
+                height: 300px;
+                object-fit: cover;
+                transition: opacity 0.3s ease;
+            }
+            .content h1 {
+                font-size: 40px;
+            }
+
+            .content p {
+                font-size: 24px;
+            }
+
+            .text-overlay {
+                font-size: 18px;
+                width: 90%;
+                line-height: 1.3;
+            }
+
+            .overlay-buttons button {
+                padding: 8px;
+            }
+
+            .overlay-buttons button a {
+                font-size: 14px;
+            }
+        }
+        /* Popup styles */
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            z-index: 1000;
+            text-align: center;
+            border-radius: 10px;
+        }
+
+        .popup button {
+            margin: 10px;
+            padding: 10px 20px;
+            background-color: #000000;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .popup button:hover {
+            background-color: #5b6369;
+        }
+
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        /* Footer section */
+        .footer-container {
+            background-color: #e0a771; 
+            padding: 40px 20px;
+        }
+
+        .footer {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .footer div {
+            flex: 1;
+            margin: 10px 20px;
+            max-width: 400px;
+            color: #ffffff;
+        }
+
+        .footer h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: #000000;
+        }
+
+        .footer p {
+            margin: 10px 0;
+            font-size: 18px;
+            color: #000000;
+        }
+
+        .footer a {
+            color: #000000;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+            color: #c68247;
+        }
+
+        .social-icons {
+            display: flex;
+            font-size: 32px;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .social-icons a {
+            color: #000000;
+            font-size: 24px;
+            transition: color 0.3s ease;
+        }
+
+        .social-icons a:hover {
+            color: #c68247;
+        }
+
+        .all-rights-reserved {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .footer {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .footer div {
+                margin-bottom: 20px;
+            }
+
+            .social-icons {
+                justify-content: center;
+            }
+        }
+        
+        .instagram-thumbnail-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px; /* Adjust this value to control the space between thumbnails */
+            justify-content: center;
+            padding: 20px;
+            margin: 20px auto; /* Center the container within its parent */
+            max-width: 960px; /* Adjust to match the max-width of your listing container */
+        }
+
+        .instagram-thumbnail {
+            position: relative; /* Required for absolute positioning of the icon */
+            width: 100%; /* Make the image fill the container */
+            height: auto;
+            border: 2px solid #ddd; /* Optional styling */
+            border-radius: 5px;
+            transition: transform 0.3s, opacity 0.3s; /* Add opacity transition */
+            display: block; /* Ensure block-level for centering */
+        }
+
+        .instagram-thumbnail:hover {
+            transform: scale(1.05);
+            opacity: 0.7; /* Lower the opacity on hover */
+        }
+
+        .instagram-thumbnail-container a {
+            position: relative;
+            display: inline-block;
+        }
+
+        .instagram-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            color: #000000; /* Instagram icon color */
+            opacity: 0;
+            transition: opacity 0.3s; /* Fade-in effect for the icon */
+        }
+
+        .instagram-thumbnail-container a:hover .instagram-icon {
+            opacity: 1; /* Show the icon on hover */
+        }
+</style>
+</head>
+<body>
+     <!-- Navbar -->
+     <nav class="navbar" id="navbar">
+        <div class="menu-icon" onclick="toggleMenu()">&#9776;</div> <!-- Only visible on mobile -->
+        <div class="navbar-left">
+            <a href="shop.html">Shop</a>
+            <a href="aboutUs.html">About Us</a>
+        </div>
+        <div class="navbar-center">
+            <a href="main.html"><img src="pics/logo.png" alt="Logo" width="60px" height="40px"></a>
+        </div>
+        <div class="navbar-right">
+            <a href="contact.html" class="contact-link">Contact Us</a> <!-- Hidden on mobile -->
+            <a href="cart.html" class="cart-icon"><i class="fas fa-shopping-cart"></i><span class="cart-count">0</span></a>
+        </div>
+    </nav>
+
+    <!-- Fullscreen Overlay Menu -->
+    <div id="overlay-menu" class="overlay-menu">
+        <span class="close-btn" onclick="toggleMenu()">&times;</span>
+        <a href="shop.html">Shop</a>
+        <a href="aboutUs.html">About Us</a>
+        <a href="contact.html">Contact Us</a> <!-- Added Contact Us in the overlay -->
+    </div>
+    <div class="slider-container">
+        <div class="slider">
+            <img src="pics/image1.png" alt="Image 1">
+            <div class="text-overlay">
+                <p>Experience the pure, nutty goodness of our all-natural peanut butter, crafted with your health in mind at CoconutzLB.</p>
+                <div class="overlay-buttons">
+                    <button id="stockButton"><a href="shop.html">Shop</a></button>
+                    <button id="contactButton"><a href="contact.html">Contact Us</a></button>
+                </div>
+            </div>            
+        </div>
+    </div>
+    <div class="content">
+        <h1>Welcome to CoconutzLB</h1>
+        <p> Shop Our Products</p>
+    </div>
+    <div class="listing-container">
+        <div class="listing-item">
+            <a href="listing1.html">
+                <img src="pics/image15.jpeg">
+            </a>
+            <div class="listing-content">
+                <p>Peanut Butter Flavor Example 1</p>
+                <p class="price" data-price="10.00">$10.00</p>
+                <button class="add-to-cart-button" data-item="Peanut Butter Flavor Example 1" data-price="10.00" data-image="file:///Users/tahasafi/Desktop/coconutzLB/pics/image15.jpeg">Add to Cart</button>
+            </div>
+        </div>
+        <div class="listing-item">
+            <a href="listing2.html">
+                <img src="pics/image16.jpeg">
+            </a>
+            <div class="listing-content">
+                <p>Peanut Butter Flavor Example 2</p>
+                <p class="price" data-price="15.00">$15.00</p>
+                <button class="add-to-cart-button" data-item="Peanut Butter Flavor Example 2" data-price="15.00" data-image="file:///Users/tahasafi/Desktop/coconutzLB/pics/image16.jpeg">Add to Cart</button>
+            </div>
+        </div>
+        <div class="listing-item">
+            <a href="listing3.html">
+                <img src="pics/image29.jpeg">
+            </a>
+            <div class="listing-content">
+                <p>Peanut Butter Flavor Example 3</p>
+                <p class="price" data-price="20.00">$20.00</p>
+                <button class="add-to-cart-button" data-item="Peanut Butter Flavor Example 3" data-price="20.00" data-image="file:///Users/tahasafi/Desktop/coconutzLB/pics/image29.jpeg">Add to Cart</button>
+            </div>
+        </div>
+        <div class="listing-item">
+            <a href="listing4.html">
+                <img src="pics/image26.png">
+            </a>
+            <div class="listing-content">
+                <p>Peanut Butter Flavor Example 4</p>
+                <p class="price" data-price="25.00">$25.00</p>
+                <button class="add-to-cart-button" data-item="Peanut Butter Flavor Example 4" data-price="25.00" data-image="file:///Users/tahasafi/Desktop/coconutzLB/pics/image26.png">Add to Cart</button>
+            </div>
+        </div>
+        <div class="listing-item">
+            <a href="listing5.html">
+                <img src="pics/image25.png">
+            </a>
+            <div class="listing-content">
+                <p>Peanut Butter Flavor Example 5</p>
+                <p class="price" data-price="30.00">$30.00</p>
+                <button class="add-to-cart-button" data-item="Peanut Butter Flavor Example 5" data-price="30.00" data-image="file:///Users/tahasafi/Desktop/coconutzLB/pics/image25.png">Add to Cart</button>
+            </div>
+        </div>
+        <div class="listing-item">
+            <a href="listing6.html">
+                <img src="pics/image0.png">
+            </a>
+            <div class="listing-content">
+                <p>Peanut Butter Flavor Example 6</p>
+                <p class="price" data-price="35.00">$35.00</p>
+                <button class="add-to-cart-button" data-item="Peanut Butter Flavor Example 6" data-price="35.00" data-image="file:///Users/tahasafi/Desktop/coconutzLB/pics/image0.png">Add to Cart</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popup overlay -->
+    <div class="popup-overlay"></div>
+
+    <!-- Popup message -->
+    <div class="popup">
+        <p>Item added to cart</p>
+        <button id="continueShopping">Continue Shopping</button>
+        <button id="viewCart">View Cart</button>
+    </div>
+    <!-- Instagram Thumbnail Section -->
+    <div class="content">
+        <h1> Reviews on Social Media <i class="fab fa-instagram"></i> </h1>
+    </div>
+    <div class="instagram-thumbnail-container">
+    <a href="https://www.instagram.com/reel/C7ca_TfCUu4/?igsh=MW1qbmgyaW51b3E2dw==" target="_blank">
+        <img src="pics/insta1.jpeg" alt="Instagram Thumbnail" class="instagram-thumbnail">
+        <i class="fab fa-instagram instagram-icon"></i>
+    </a>
+    <a href="https://www.instagram.com/reel/C7mHPEWi2vx/?utm_source=ig_web_copy_link" target="_blank">
+        <img src="pics/insta2.jpeg" alt="Instagram Thumbnail" class="instagram-thumbnail">
+        <i class="fab fa-instagram instagram-icon"></i>
+    </a>
+    <a href="https://www.instagram.com/reel/C8Py6uniGL-/?utm_source=ig_web_copy_link" target="_blank">
+        <img src="pics/insta3.jpeg" alt="Instagram Thumbnail" class="instagram-thumbnail">
+        <i class="fab fa-instagram instagram-icon"></i>
+    </a>
+    <a href="https://www.instagram.com/reel/DJo8o9-MCND/?utm_source=ig_web_copy_link" target="_blank">
+        <img src="pics/insta4.jpeg" alt="Instagram Thumbnail" class="instagram-thumbnail">
+        <i class="fab fa-instagram instagram-icon"></i>
+    </a>
+    <a href="https://www.instagram.com/reel/DJXEAv_CnOQ/?utm_source=ig_web_copy_link" target="_blank">
+        <img src="pics/insta5.jpeg" alt="Instagram Thumbnail" class="instagram-thumbnail">
+        <i class="fab fa-instagram instagram-icon"></i>
+    </a>
+    <a href="https://www.instagram.com/reel/C74sAQzCSlb/?igsh=MTA5NnZwZzFiMWwxYQ==" target="_blank">
+        <img src="pics/insta6.jpeg" alt="Instagram Thumbnail" class="instagram-thumbnail">
+        <i class="fab fa-instagram instagram-icon"></i>
+    </a>
+</div>
+
+    <div class="footer-container">
+        <footer class="footer">
+            <div class="footer-logo">
+                <a href="index.html"><img src="pics/logo.png" width="160px" height="100px" alt="Logo"></a>
+            </div>
+            <div class="footer-policies">
+                <h2>Policies</h2>
+                <p><a href="privacy.html">Privacy Policy</a></p>
+                <p><a href="terms.html">Terms</a></p>
+                <p><a href="refunds.html">Refunds & Returns</a></p>
+                <p><a href="delivery.html">Delivery Policy</a></p>
+            </div>
+            <div class="footer-contact-us">
+                <h2>Contact Us</h2>
+                <p>Phone: <a href="tel:+96181987929">+961 81 987 929</a></p>
+                <p>Email: <a href="mailto:coconutzlb@gmail.com">coconutzlb@gmail.com</a></p>
+                <p>WhatsApp: <a href="https://wa.me/+96181987929">+961 81 987 929</a></p>
+                <div class="social-icons">
+                    <a href="https://www.instagram.com/coconutz_lb" target="_blank"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.facebook.com/your_facebook_profile" target="_blank"><i class="fab fa-facebook-square"></i></a>
+                </div>
+            </div>
+        </footer>
+        <div class="all-rights-reserved">
+            <p>&copy; 2024 CocoNutzLB. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script>
+        const images = [
+            'pics/image1.png',
+            'pics/image7.png',
+            'pics/image2.png',
+            'pics/image3.png',
+            'pics/image4.png',
+            'pics/image5.png',
+            'pics/image6.png'
+        ];
+        let currentIndex = 0;
+        const slider = document.querySelector('.slider img');
+        setInterval(() => {
+            currentIndex = (currentIndex < images.length - 1) ? currentIndex + 1 : 0;
+            slider.src = images[currentIndex];
+        }, 3000);
+        window.addEventListener('scroll', function() {
+            var navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) { // Adjust this value to set the scroll trigger point
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        let cartCount = 0;
+
+        document.querySelectorAll('.add-to-cart-button').forEach(button => {
+            button.addEventListener('click', (event) => {
+                const item = event.target.getAttribute('data-item');
+                const price = parseFloat(event.target.getAttribute('data-price'));
+                const image = event.target.getAttribute('data-image');
+                addToCart(item, price, image);
+                cartCount++;
+                document.querySelector('.cart-count').innerText = cartCount;
+                showPopup();
+            });
+        });
+
+        function addToCart(item, price, image) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            let existingItem = cart.find(cartItem => cartItem.name === item);
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({ name: item, price: price, image: image, quantity: 1 });
+            }
+            localStorage.setItem('cart', JSON.stringify(cart));
+        }
+
+        const popup = document.querySelector('.popup');
+        const popupOverlay = document.querySelector('.popup-overlay');
+        const continueShopping = document.getElementById('continueShopping');
+        const viewCart = document.getElementById('viewCart');
+
+        continueShopping.addEventListener('click', () => {
+            hidePopup();
+        });
+
+        viewCart.addEventListener('click', () => {
+            // Redirect to cart page (example link)
+            window.location.href = 'cart.html';
+        });
+
+        function showPopup() {
+            popup.style.display = 'block';
+            popupOverlay.style.display = 'block';
+        }
+
+        function hidePopup() {
+            popup.style.display = 'none';
+            popupOverlay.style.display = 'none';
+        }
+        function toggleMenu() {
+            const overlayMenu = document.getElementById('overlay-menu');
+            overlayMenu.classList.toggle('open'); // Toggle the 'open' class to show/hide the menu
+        }
+        // Add scroll event listener to handle the navbar change on scroll
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) { // Adjust the scroll position value as needed
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+    </script>
+</body>
+</html>
